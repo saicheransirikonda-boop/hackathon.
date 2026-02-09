@@ -1,0 +1,270 @@
+import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Activity, Brain, Droplet, Scissors } from "lucide-react";
+
+/* ================= GLOBAL APP ================= */
+export default function App() {
+  const [user, setUser] = useState(null);
+
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login setUser={setUser} />} />
+        <Route path="/dashboard" element={user ? <Dashboard user={user} /> : <Navigate to="/login" />} />
+      </Routes>
+    </Router>
+  );
+}
+
+/* ================= HOME PAGE ================= */
+function Home() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-100">
+      <nav className="flex justify-between items-center px-8 py-4 bg-white shadow-md">
+        <h1 className="text-2xl font-bold text-purple-600">AroMi AI</h1>
+        <Link to="/login" className="bg-purple-600 text-white px-6 py-2 rounded-xl">Login / Register</Link>
+      </nav>
+
+      <section className="flex flex-col items-center justify-center text-center px-6 py-24">
+        <motion.h2 initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-4xl md:text-5xl font-bold mb-4">
+          AroMi AI Agent
+        </motion.h2>
+        <p className="text-lg md:text-xl max-w-2xl mb-6">
+          A real-world adaptive AI health & wellness coach for body, mind, skin, and hair.
+        </p>
+        <Link to="/login" className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-xl shadow-lg">Get Started</Link>
+      </section>
+    </div>
+  );
+}
+
+/* ================= LOGIN PAGE ================= */
+function Login({ setUser }) {
+  const navigate = useNavigate();
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    age: "",
+    bloodGroup: "",
+    gender: "",
+    height: "",
+    weight: "",
+  });
+
+  const handleChange = (field, value) => {
+    setForm({ ...form, [field]: value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!form.name || !form.email || !form.age || !form.bloodGroup || !form.gender || !form.height || !form.weight) {
+      alert("Please fill all fields");
+      return;
+    }
+    setUser(form);
+    navigate("/dashboard");
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 to-blue-100">
+      <div className="w-full max-w-xl bg-white shadow-2xl rounded-2xl p-8">
+        <h2 className="text-3xl font-bold text-center mb-6 text-purple-700">User Registration</h2>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input className="border p-2 rounded" placeholder="Full Name" value={form.name} onChange={(e) => handleChange("name", e.target.value)} />
+          <input className="border p-2 rounded" placeholder="Email" type="email" value={form.email} onChange={(e) => handleChange("email", e.target.value)} />
+          <input className="border p-2 rounded" placeholder="Age" type="number" value={form.age} onChange={(e) => handleChange("age", e.target.value)} />
+
+          <select className="border p-2 rounded" value={form.bloodGroup} onChange={(e) => handleChange("bloodGroup", e.target.value)}>
+            <option value="">Blood Group</option>
+            <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+          </select>
+
+          <select className="border p-2 rounded" value={form.gender} onChange={(e) => handleChange("gender", e.target.value)}>
+            <option value="">Gender</option>
+            <option>Male</option><option>Female</option><option>Other</option>
+          </select>
+
+          <input className="border p-2 rounded" placeholder="Height (cm)" type="number" value={form.height} onChange={(e) => handleChange("height", e.target.value)} />
+          <input className="border p-2 rounded" placeholder="Weight (kg)" type="number" value={form.weight} onChange={(e) => handleChange("weight", e.target.value)} />
+
+          <button type="submit" className="col-span-1 md:col-span-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl mt-4 py-2">
+            Continue to Dashboard
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/* ================= DASHBOARD ================= */
+function Dashboard({ user }) {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-100">
+      <nav className="flex justify-between items-center px-8 py-4 bg-white shadow-md">
+        <h1 className="text-2xl font-bold text-purple-600">AroMi AI</h1>
+        <span className="font-medium">Welcome, {user.name}</span>
+      </nav>
+
+      <section className="px-6 py-10 max-w-7xl mx-auto">
+        <h2 className="text-3xl font-bold text-center mb-10">Your Health Dashboard</h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+          <SummaryCard icon={<Activity />} title="Body Health" description="Physical fitness & lifestyle" />
+          <SummaryCard icon={<Brain />} title="Mental Wellness" description="Stress, mood & emotional health" />
+          <SummaryCard icon={<Droplet />} title="Skin Care" description="Skin condition & routine" />
+          <SummaryCard icon={<Scissors />} title="Hair Care" description="Hair health & scalp condition" />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <AssessmentCard title="Body Health Assessment" questions={bodyHealthQuestions} type="body" />
+          <AssessmentCard title="Mental Wellness Assessment" questions={mentalHealthQuestions} type="mental" />
+          <AssessmentCard title="Skin Health Assessment" questions={skinHealthQuestions} type="skin" />
+          <AssessmentCard title="Hair Health Assessment" questions={hairHealthQuestions} type="hair" />
+        </div>
+      </section>
+    </div>
+  );
+}
+
+/* ================= SUMMARY CARD ================= */
+function SummaryCard({ icon, title, description }) {
+  return (
+    <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-center text-center">
+      <div className="h-10 w-10 text-purple-600 mb-3">{icon}</div>
+      <h4 className="text-lg font-semibold">{title}</h4>
+      <p className="text-sm text-gray-500">{description}</p>
+    </div>
+  );
+}
+
+/* ================= ASSESSMENT CARD ================= */
+function AssessmentCard({ title, questions, type }) {
+  const [answers, setAnswers] = useState({});
+  const [report, setReport] = useState(null);
+
+  const handleAnswer = (qIndex, value) => {
+    setAnswers({ ...answers, [qIndex]: value });
+  };
+
+  const generateReport = () => {
+    const score = Math.floor(60 + Math.random() * 35);
+
+    const reports = {
+      body: {
+        title: "Body Health Report",
+        issues: "Possible fatigue, mild nutrient deficiency, irregular sleep pattern.",
+        cures: "Increase physical activity, improve diet balance, ensure hydration, maintain sleep schedule.",
+        medication: "Multivitamin supplement, Vitamin D3 if deficient (consult doctor).",
+        precautions: "Avoid junk food, reduce screen time before bed, get regular health checkups.",
+      },
+      mental: {
+        title: "Mental Wellness Report",
+        issues: "Moderate stress levels, signs of emotional fatigue, reduced focus.",
+        cures: "Practice mindfulness, exercise regularly, follow consistent sleep routine.",
+        medication: "Herbal supplements like Ashwagandha (only after medical advice).",
+        precautions: "Avoid overworking, limit caffeine, seek professional counseling if needed.",
+      },
+      skin: {
+        title: "Skin Health Report",
+        issues: "Oily skin tendency, mild acne, sun exposure impact.",
+        cures: "Follow CTM (Cleanse-Tone-Moisturize) routine, apply sunscreen daily.",
+        medication: "Salicylic acid face wash, niacinamide serum (dermatologist recommended).",
+        precautions: "Avoid harsh products, reduce sugar intake, drink enough water.",
+      },
+      hair: {
+        title: "Hair Health Report",
+        issues: "Hair fall, scalp dryness, possible dandruff.",
+        cures: "Oil massage weekly, protein-rich diet, gentle hair care routine.",
+        medication: "Ketoconazole shampoo if dandruff persists (doctor advised).",
+        precautions: "Avoid heat styling, reduce chemical treatments, manage stress.",
+      },
+    };
+
+    setReport({ score, ...reports[type] });
+  };
+
+  return (
+    <div className="bg-white rounded-2xl shadow-xl p-6">
+      <h3 className="text-xl font-bold mb-4 text-purple-700">{title}</h3>
+
+      {!report && (
+        <div className="space-y-4">
+          {questions.map((q, index) => (
+            <div key={index}>
+              <p className="font-medium mb-2">{q.question}</p>
+              <select className="border p-2 rounded w-full" onChange={(e) => handleAnswer(index, e.target.value)}>
+                <option value="">Select an option</option>
+                {q.options.map((opt, i) => (
+                  <option key={i} value={opt}>{opt}</option>
+                ))}
+              </select>
+            </div>
+          ))}
+          <button onClick={generateReport} className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl mt-4 py-2 px-4">
+            Generate Report
+          </button>
+        </div>
+      )}
+
+      {report && (
+        <div className="space-y-4">
+          <h4 className="text-lg font-semibold">{report.title}</h4>
+          <p><strong>Health Score:</strong> {report.score}%</p>
+          <div className="w-full bg-gray-200 rounded-full h-3"><div className="bg-purple-600 h-3 rounded-full" style={{ width: `${report.score}%` }} /></div>
+          <p><strong>Identified Issues:</strong> {report.issues}</p>
+          <p><strong>Cures & Lifestyle Improvements:</strong> {report.cures}</p>
+          <p><strong>Medication (If Required):</strong> {report.medication}</p>
+          <p><strong>Precautions:</strong> {report.precautions}</p>
+          <p className="text-xs text-gray-500 mt-2">Disclaimer: This report is AI-generated and not a medical diagnosis. Always consult a healthcare professional.</p>
+          <button onClick={() => setReport(null)} className="border rounded-xl mt-2 py-2 px-4">Reassess</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ================= QUESTIONS DATA ================= */
+const bodyHealthQuestions = [
+  { question: "How many hours do you sleep on average?", options: ["<5 hours", "5–6 hours", "7–8 hours", ">8 hours"] },
+  { question: "How often do you exercise?", options: ["Never", "1–2 days/week", "3–4 days/week", "Daily"] },
+  { question: "How would you describe your daily energy levels?", options: ["Very low", "Low", "Moderate", "High"] },
+  { question: "How balanced is your diet?", options: ["Poor", "Fair", "Good", "Excellent"] },
+  { question: "Do you experience frequent fatigue?", options: ["Never", "Sometimes", "Often", "Always"] },
+  { question: "How much water do you drink daily?", options: ["<1 L", "1–2 L", "2–3 L", ">3 L"] },
+  { question: "Do you have any chronic health conditions?", options: ["No", "Yes – managed", "Yes – unmanaged", "Prefer not to say"] },
+  { question: "How often do you eat outside/junk food?", options: ["Rarely", "1–2 times/week", "3–4 times/week", "Daily"] },
+];
+
+const mentalHealthQuestions = [
+  { question: "How often do you feel stressed?", options: ["Never", "Sometimes", "Often", "Always"] },
+  { question: "How would you rate your mood stability?", options: ["Very unstable", "Somewhat unstable", "Mostly stable", "Very stable"] },
+  { question: "Do you experience anxiety or panic?", options: ["Never", "Occasionally", "Frequently", "Constantly"] },
+  { question: "How well can you focus on tasks?", options: ["Very poorly", "Poorly", "Well", "Very well"] },
+  { question: "How often do you feel emotionally exhausted?", options: ["Never", "Sometimes", "Often", "Always"] },
+  { question: "How is your sleep quality?", options: ["Very poor", "Poor", "Good", "Excellent"] },
+  { question: "Do you practice any relaxation techniques?", options: ["Never", "Rarely", "Sometimes", "Regularly"] },
+  { question: "How supported do you feel socially?", options: ["Not supported", "Slightly supported", "Well supported", "Very supported"] },
+];
+
+const skinHealthQuestions = [
+  { question: "What is your skin type?", options: ["Dry", "Oily", "Combination", "Sensitive"] },
+  { question: "Do you experience acne or breakouts?", options: ["Never", "Occasionally", "Frequently", "Severe"] },
+  { question: "How often do you use sunscreen?", options: ["Never", "Sometimes", "Often", "Daily"] },
+  { question: "Do you experience skin sensitivity?", options: ["Never", "Rarely", "Often", "Always"] },
+  { question: "How would you rate your skincare routine?", options: ["None", "Basic", "Moderate", "Advanced"] },
+  { question: "Do you have pigmentation or dark spots?", options: ["No", "Mild", "Moderate", "Severe"] },
+  { question: "How hydrated does your skin feel?", options: ["Very dry", "Dry", "Normal", "Well hydrated"] },
+];
+
+const hairHealthQuestions = [
+  { question: "How often do you experience hair fall?", options: ["Never", "Occasionally", "Frequently", "Severe"] },
+  { question: "Do you experience dandruff or itchy scalp?", options: ["Never", "Occasionally", "Frequently", "Severe"] },
+  { question: "How would you describe your scalp type?", options: ["Dry", "Oily", "Normal", "Sensitive"] },
+  { question: "How often do you oil your hair?", options: ["Never", "Once a month", "Once a week", "Multiple times a week"] },
+  { question: "Do you use heat styling tools?", options: ["Never", "Rarely", "Often", "Daily"] },
+  { question: "How would you rate your hair texture?", options: ["Very weak", "Weak", "Healthy", "Very healthy"] },
+  { question: "Do you experience premature greying?", options: ["No", "Few strands", "Moderate", "Severe"] },
+];
